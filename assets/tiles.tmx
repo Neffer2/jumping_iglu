@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="21" height="6" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="1">
+ <editorsettings>
+  <export target="ground.json" format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" name="tiles1" tilewidth="128" tileheight="128" tilecount="18" columns="18">
+  <image source="spritesheet.png" width="2304" height="128"/>
+ </tileset>
+ <layer id="2" name="sky" width="21" height="6" visible="0">
+  <data encoding="csv">
+18,18,18,18,18,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+18,18,18,18,18,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+18,18,18,18,18,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+18,18,18,18,18,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="3" name="water" width="21" height="6">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,15,0,0,0,15,15,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="1" name="ground" width="21" height="6" locked="1">
+  <data encoding="csv">
+2,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+6,5,0,0,13,16,0,0,0,0,0,0,0,0,0,0,0,0,13,16,0,
+0,0,0,0,0,0,0,0,0,0,13,16,0,0,1,4,0,0,0,0,0,
+0,0,0,0,0,0,0,0,1,4,0,0,0,0,3,5,0,0,0,0,0,
+2,2,2,2,2,4,0,1,7,5,0,0,1,2,2,2,4,0,1,2,2,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

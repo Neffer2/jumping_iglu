@@ -11,6 +11,7 @@ class MainScene extends Phaser.Scene {
         this.load.image('ground', './assets/Tiles/ground.png');
         this.load.image('air_ground', './assets/Tiles/air_ground.png');
         this.load.image('player', './assets/sprites/penguin_walk01.png');
+        this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
 
         // loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
         // function loadFont(name, url) {
@@ -66,6 +67,16 @@ class MainScene extends Phaser.Scene {
             const body = platform.body
             body.updateFromGameObject()
         }
+
+        /* animations */
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('jump', {start: 0, end: 2}),
+            frameRate: 8,
+            repeat: 0
+        });
+
+        /* --- */
     }
 
     update(){
@@ -90,13 +101,16 @@ class MainScene extends Phaser.Scene {
 
         if (scanner.left.isDown){
             player.setVelocityX(-velocityX);
+            player.flipX = true;
         }else if (scanner.right.isDown){
             player.setVelocityX(velocityX);
+            player.flipX = false;
         }else {
             player.setVelocityX(0);
         }
 
         if (player.body.touching.down){
+            player.anims.play('jump', true);
             player.setVelocityY(-velocityY);
         }
     }

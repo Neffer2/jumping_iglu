@@ -4,6 +4,9 @@ let air_ground;
 let camera;
 let goLeft;
 let goRight;
+let Score = 0;
+let scoreText;
+let begin_jump = false;
 
 class MainScene extends Phaser.Scene {
     constructor(){
@@ -12,20 +15,22 @@ class MainScene extends Phaser.Scene {
 
     preload(){
         this.load.image('background', './assets/BG/BG.png');
+        this.load.image('marco', './assets/BG/marco.png');
         this.load.image('ground', './assets/Tiles/ground.png');
         this.load.image('air_ground', './assets/Tiles/air_ground.png');
-        this.load.image('player', './assets/sprites/penguin_jump3.png');
+        this.load.image('player', './assets/sprites/penguin_walk01.png');
         this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('walk', './assets/sprites/walk.png', {frameWidth: 59, frameHeight: 64});
 
-        // loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
-        // function loadFont(name, url) {
-        //     var newFont = new FontFace(name, `url(${url})`);
-        //     newFont.load().then(function (loaded) {
-        //         document.fonts.add(loaded);
-        //     }).catch(function (error) {
-        //         return error;
-        //     });
-        // }
+        loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
+        function loadFont(name, url) {
+            var newFont = new FontFace(name, `url(${url})`);
+            newFont.load().then(function (loaded) {
+                document.fonts.add(loaded);
+            }).catch(function (error) {
+                return error;
+            });
+        }
     }    
  
     create(){
@@ -39,6 +44,10 @@ class MainScene extends Phaser.Scene {
             // air_ground.create(256, 350, 'air_ground').setSize(100 ,20, true).setScale(.5); 
             // air_ground.create(0, 150, 'air_ground').setSize(100 ,20, true).setScale(.5); 
         /* -- */
+
+        /* Score */
+            scoreText = this.add.text(20 , 18, Score, { fontSize: 64, fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif' }).setScrollFactor(1, 0);
+        /* --- */
 
         /* MOBILE CONTROLLLS */ 
             if (screen.width <= 900){
@@ -111,6 +120,13 @@ class MainScene extends Phaser.Scene {
             repeat: 0
         });
 
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('walk', {start: 0, end: 3}),
+            frameRate: 8,
+            repeat: 0
+        });
+
         /* --- */
     }
 
@@ -131,21 +147,34 @@ class MainScene extends Phaser.Scene {
 
         let scanner = this.input.keyboard.createCursorKeys();
         let velocityY = 500;
-        let velocityX = 160;
-
-        if (scanner.left.isDown || goLeft){
-            player.setVelocityX(-velocityX);
-            player.flipX = true;
-        }else if (scanner.right.isDown || goRight){
-            player.setVelocityX(velocityX);
-            player.flipX = false;
-        }else {
-            player.setVelocityX(0);
+        let velocityX = 250;
+        
+        if (scanner.space.isDown){
+            begin_jump = true;
         }
 
-        if (player.body.touching.down){
-            player.anims.play('jump', true);
-            player.setVelocityY(-velocityY);
+            if (scanner.left.isDown || goLeft){
+                player.setVelocityX(-velocityX);
+                player.flipX = true;
+                if (!begin_jump){player.anims.play('walk', true);}
+            }else if (scanner.right.isDown || goRight){
+                player.setVelocityX(velocityX);
+                player.flipX = false;
+                if (!begin_jump){player.anims.play('walk', true);}
+            }else {
+                player.setVelocityX(0);
+            }
+
+        if (begin_jump){
+            if (player.body.touching.down){
+                player.anims.play('jump', true);
+                player.setVelocityY(-velocityY);
+            }
+        }
+
+        if (player.y < Score){
+            Score = Math.trunc(player.y) ;
+            scoreText.setText(Score * -1);
         }
 
         this.horizontalWrap(player);
@@ -166,6 +195,45 @@ class MainScene extends Phaser.Scene {
 	}
 }
 
+class Menu extends Phaser.Scene {
+    constructor(){
+        super('menuScene');
+    }  
+
+    preload(){
+        this.load.image('background', './assets/BG/BG.png');
+        this.load.image('marco', './assets/BG/marco.png');
+        this.load.image('menu-digital', './assets/BG/menu-digital.png');
+        this.load.image('ground', './assets/Tiles/ground.png');
+        this.load.image('air_ground', './assets/Tiles/air_ground.png');
+        this.load.image('player', './assets/sprites/penguin_walk01.png');
+        this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('walk', './assets/sprites/walk.png', {frameWidth: 59, frameHeight: 64});
+
+        loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
+        function loadFont(name, url) {
+            var newFont = new FontFace(name, `url(${url})`);
+            newFont.load().then(function (loaded) {
+                document.fonts.add(loaded);
+            }).catch(function (error) {
+                return error;
+            });
+        }
+    }    
+ 
+    create(){
+        this.add.image(256, 320, 'background').setScrollFactor(1, 0);
+        this.add.image(this.scale.width/2, this.scale.height/4, 'menu-digital').setScale(.4);
+
+        this.add.text(this.scale.width/13, this.scale.height/2, "Salta con Iglú", { fontSize: 64, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif' }).setScrollFactor(1, 0);
+
+    }
+
+    update(){
+        
+    }
+}
+
 // Configuracion general
 const config = {
     // Phaser.AUTO, intenta usa WebGL y si el navegador no lo tiene, usa canva.
@@ -173,9 +241,10 @@ const config = {
     parent: 'game-container',
     width: 512,
     height: 640,
-    scene: [MainScene],
+    backgroundColor: '#007EE9',
+    scene: [Menu, MainScene],
     scale: {
-        // mode: Phaser.Scale.FIT
+        mode: Phaser.Scale.FIT
     },
     physics: {
         default: 'arcade',

@@ -1,6 +1,9 @@
 let player;
 let ground;
 let air_ground;
+let camera;
+let goLeft;
+let goRight;
 
 class MainScene extends Phaser.Scene {
     constructor(){
@@ -8,9 +11,10 @@ class MainScene extends Phaser.Scene {
     }  
 
     preload(){
+        this.load.image('background', './assets/BG/BG.png');
         this.load.image('ground', './assets/Tiles/ground.png');
         this.load.image('air_ground', './assets/Tiles/air_ground.png');
-        this.load.image('player', './assets/sprites/penguin_walk01.png');
+        this.load.image('player', './assets/sprites/penguin_jump3.png');
         this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
 
         // loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
@@ -26,6 +30,7 @@ class MainScene extends Phaser.Scene {
  
     create(){
         /* Env */
+            this.add.image(256, 320, 'background').setScrollFactor(1, 0);
             ground = this.physics.add.image(256, 600, 'ground');
             ground.body.allowGravity = false;
             ground.setImmovable();
@@ -35,13 +40,43 @@ class MainScene extends Phaser.Scene {
             // air_ground.create(0, 150, 'air_ground').setSize(100 ,20, true).setScale(.5); 
         /* -- */
 
+        /* MOBILE CONTROLLLS */ 
+            if (screen.width <= 900){
+                /* x, y, alto, ancho */
+                    let leftZone = this.add.zone(0, 0, (this.scale.width/2), this.scale.height);
+                    leftZone.setOrigin(0);
+                    leftZone.setScrollFactor(1, 0);
+                    leftZone.setInteractive();
+
+                    let rightZone = this.add.zone((this.scale.width/2), 0, (this.scale.width/2), this.scale.height);
+                    rightZone.setOrigin(0);
+                    rightZone.setScrollFactor(1, 0);
+                    rightZone.setInteractive();
+                /* --- */
+
+                /* EVENTS */
+                    leftZone.on('pointerdown', () => goLeft = true);
+                    leftZone.on('pointerup', () => goLeft = false);
+                    leftZone.on('pointerout', () => goLeft = false);
+
+                    rightZone.on('pointerdown', () => goRight = true);
+                    rightZone.on('pointerup', () => goRight = false);
+                    rightZone.on('pointerout', () => goRight = false);
+                /* --- */
+            }
+        /* --- */
+
         /* player */
             player = this.physics.add.sprite(256, 400, 'player');
             player.setSize(55, 60, false);
 
             //camera
-            // this.cameras.main.setBounds(0, 0, 512, 0);
-            this.cameras.main.startFollow(player, true);
+            // this.cameras.main.setBounds(0, 0, 0, 0);
+            // camera = this.cameras.main.startFollow(player, true);
+            camera = this.cameras.main;
+            camera.startFollow(player, true);
+            camera.setLerp(0, 0.1);
+            camera.setDeadzone(this.scale.width);
         /* --- */ 
 
         /* Collide */
@@ -80,13 +115,12 @@ class MainScene extends Phaser.Scene {
     }
 
     update(){
-
-        // 
+        // Reutilizacion de platafomras
         air_ground.children.iterate(child => {
             /** @type {Phaser.Physics.Arcade.Sprite} */
             const platform = child
             const scrollY = this.cameras.main.scrollY
-            console.log(this.cameras.main.scrollY);
+            // console.log(this.cameras.main.scrollY);
             if (platform.y >= scrollY + 650){
                 platform.y = scrollY + Phaser.Math.Between(48, 50);
                 platform.x = Phaser.Math.Between(64, 448);
@@ -99,10 +133,10 @@ class MainScene extends Phaser.Scene {
         let velocityY = 500;
         let velocityX = 160;
 
-        if (scanner.left.isDown){
+        if (scanner.left.isDown || goLeft){
             player.setVelocityX(-velocityX);
             player.flipX = true;
-        }else if (scanner.right.isDown){
+        }else if (scanner.right.isDown || goRight){
             player.setVelocityX(velocityX);
             player.flipX = false;
         }else {
@@ -113,7 +147,23 @@ class MainScene extends Phaser.Scene {
             player.anims.play('jump', true);
             player.setVelocityY(-velocityY);
         }
+
+        this.horizontalWrap(player);
     }
+
+    horizontalWrap(sprite)
+	{
+		const halfWidth = sprite.displayWidth * 0.5
+		const gameWidth = this.scale.width
+		if (sprite.x < -halfWidth)
+		{
+			sprite.x = gameWidth + halfWidth
+		}
+		else if (sprite.x > gameWidth + halfWidth)
+		{
+			sprite.x = -halfWidth
+		}
+	}
 }
 
 // Configuracion general

@@ -202,11 +202,11 @@ class Menu extends Phaser.Scene {
 
     preload(){
         this.load.image('background', './assets/BG/BG.png');
-        this.load.image('marco', './assets/BG/marco.png');
         this.load.image('menu-digital', './assets/BG/menu-digital.png');
         this.load.image('ground', './assets/Tiles/ground.png');
         this.load.image('air_ground', './assets/Tiles/air_ground.png');
         this.load.image('player', './assets/sprites/penguin_walk01.png');
+        this.load.image('play_btn', './assets/Buttons/340-px/Play.png');
         this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('walk', './assets/sprites/walk.png', {frameWidth: 59, frameHeight: 64});
 
@@ -223,9 +223,18 @@ class Menu extends Phaser.Scene {
  
     create(){
         this.add.image(256, 320, 'background').setScrollFactor(1, 0);
-        this.add.image(this.scale.width/2, this.scale.height/4, 'menu-digital').setScale(.4);
+        // this.add.image(this.scale.width/2, this.scale.height/4, 'menu-digital').setScale(.4);
 
-        this.add.text(this.scale.width/13, this.scale.height/2, "Salta con Iglú", { fontSize: 64, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif' }).setScrollFactor(1, 0);
+        let title = this.add.text(this.scale.width/9, this.scale.height/8, "Ice-Ice \n baby", { fontSize: 128, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
+        let btn_play = this.add.image(this.scale.width/2, this.scale.height * .8, 'play_btn').setScale(.5).setScrollFactor(1, 0).setInteractive();
+        
+        btn_play.on('pointerover',function(pointer){
+            btn_play.setScale(.6);
+        });
+
+        btn_play.on('pointerout',function(pointer){
+            btn_play.setScale(.5);
+        });
 
     }
 

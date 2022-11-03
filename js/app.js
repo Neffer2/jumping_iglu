@@ -7,6 +7,8 @@ let goRight;
 let Score = 0;
 let scoreText;
 let begin_jump = false;
+let penguin;
+let aux = true;
 
 class MainScene extends Phaser.Scene {
     constructor(){
@@ -126,7 +128,6 @@ class MainScene extends Phaser.Scene {
             frameRate: 8,
             repeat: 0
         });
-
         /* --- */
     }
 
@@ -210,6 +211,10 @@ class Menu extends Phaser.Scene {
         this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('walk', './assets/sprites/walk.png', {frameWidth: 59, frameHeight: 64});
 
+        this.load.image('tiles', './assets/spritesheet.png');
+        this.load.tilemapTiledJSON('map', './assets/ground.json'); 
+        
+
         loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
         function loadFont(name, url) {
             var newFont = new FontFace(name, `url(${url})`);
@@ -217,29 +222,60 @@ class Menu extends Phaser.Scene {
                 document.fonts.add(loaded);
             }).catch(function (error) {
                 return error;
-            });
+            }); 
         }
     }    
  
     create(){
-        this.add.image(256, 320, 'background').setScrollFactor(1, 0);
-        // this.add.image(this.scale.width/2, this.scale.height/4, 'menu-digital').setScale(.4);
+        /* background */
+            this.add.image(256, 320, 'background').setScrollFactor(1, 0);
+            
+            const map = this.make.tilemap({ key: "map", tileWidth: 128, tileHeight: 128});
+            const tileset = map.addTilesetImage("tiles1","tiles");
+            const layer = map.createLayer("ground", tileset, 0, 0);
+            layer.alpha = 0.6;
+        /* --- */
 
-        let title = this.add.text(this.scale.width/9, this.scale.height/8, "Ice-Ice \n baby", { fontSize: 128, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
-        let btn_play = this.add.image(this.scale.width/2, this.scale.height * .8, 'play_btn').setScale(.5).setScrollFactor(1, 0).setInteractive();
+        /* Title */
+            let title = this.add.text(0, this.scale.height * .1, "Ice-Ice \n Jumping", { fontSize: 128, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
+            let btn_play = this.add.image(this.scale.width/2, this.scale.height * .8, 'play_btn').setScale(.5).setScrollFactor(1, 0).setInteractive();
+        /* --- */
         
-        btn_play.on('pointerover',function(pointer){
-            btn_play.setScale(.6);
-        });
+        /* Interacciones */
+            btn_play.on('pointerover',function(pointer){
+                btn_play.setScale(.6);
+            });
 
-        btn_play.on('pointerout',function(pointer){
-            btn_play.setScale(.5);
-        });
+            btn_play.on('pointerout',function(pointer){
+                btn_play.setScale(.5);
+            });
 
+            penguin = this.physics.add.sprite(40, 400, 'player');
+        /* --- */
+
+        /* animations */
+            this.anims.create({
+                key: 'walk',
+                frames: this.anims.generateFrameNumbers('walk', {start: 0, end: 3}),
+                frameRate: 8,
+                repeat: 0
+            });
+        /* --- */
+
+        /* colitions */
+            this.physics.add.collider(penguin, layer);
+            layer.setCollisionBetween(1, 2);
+        /* --- */
     }
 
     update(){
-        
+        if (penguin.x < 450 && aux){
+            penguin.setVelocityX(150);
+            penguin.anims.play('wallk', true);
+        }else if (penguin.x > 0 ){
+            penguin.setVelocityX(-150);
+            penguin.anims.play('wallk', true);
+        }
     }
 }
 

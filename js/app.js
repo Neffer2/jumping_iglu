@@ -8,7 +8,6 @@ let Score = 0;
 let scoreText;
 let begin_jump = false;
 let penguin;
-let aux = true;
 
 class MainScene extends Phaser.Scene {
     constructor(){
@@ -211,6 +210,10 @@ class Menu extends Phaser.Scene {
         this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('walk', './assets/sprites/walk.png', {frameWidth: 59, frameHeight: 64});
 
+        /* objects */
+        this.load.image('iglu', './assets/Object/Igloo.png');
+        /* -- */
+
         this.load.image('tiles', './assets/spritesheet.png');
         this.load.tilemapTiledJSON('map', './assets/ground.json'); 
         
@@ -228,16 +231,35 @@ class Menu extends Phaser.Scene {
  
     create(){
         /* background */
-            this.add.image(256, 320, 'background').setScrollFactor(1, 0);
+            this.add.image(256, 320, 'background').setScrollFactor(1, 0).alpha = 0.7;
             
             const map = this.make.tilemap({ key: "map", tileWidth: 128, tileHeight: 128});
             const tileset = map.addTilesetImage("tiles1","tiles");
             const layer = map.createLayer("ground", tileset, 0, 0);
             layer.alpha = 0.6;
+            
+        /* --- */
+
+        /* Objects */
+            this.add.image(20, 452, 'iglu').setScale(.6).flipX = true;
+        /* --- */
+
+        /* Penguni */
+            this.anims.create({
+                key: 'walk',
+                frames: this.anims.generateFrameNumbers('walk', {start: 0, end: 3}), 
+                frameRate: 8,
+                repeat: -1
+            }); 
+            penguin = this.physics.add.sprite(46, 480, 'player').setScale(.7);
+            if (penguin.x < 450){
+                penguin.setVelocityX(90);
+                penguin.anims.play('walk', true);
+            }
         /* --- */
 
         /* Title */
-            let title = this.add.text(0, this.scale.height * .1, "Ice-Ice \n Jumping", { fontSize: 128, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
+            let title = this.add.text(4, this.scale.height * .1, "¡Salta! \n Web-On", { fontSize: 128, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
             let btn_play = this.add.image(this.scale.width/2, this.scale.height * .8, 'play_btn').setScale(.5).setScrollFactor(1, 0).setInteractive();
         /* --- */
         
@@ -249,17 +271,6 @@ class Menu extends Phaser.Scene {
             btn_play.on('pointerout',function(pointer){
                 btn_play.setScale(.5);
             });
-
-            penguin = this.physics.add.sprite(40, 400, 'player');
-        /* --- */
-
-        /* animations */
-            this.anims.create({
-                key: 'walk',
-                frames: this.anims.generateFrameNumbers('walk', {start: 0, end: 3}),
-                frameRate: 8,
-                repeat: 0
-            });
         /* --- */
 
         /* colitions */
@@ -269,14 +280,20 @@ class Menu extends Phaser.Scene {
     }
 
     update(){
-        if (penguin.x < 450 && aux){
-            penguin.setVelocityX(150);
-            penguin.anims.play('wallk', true);
-        }else if (penguin.x > 0 ){
-            penguin.setVelocityX(-150);
-            penguin.anims.play('wallk', true);
-        }
+        this.horizontalWrap(penguin);
     }
+        horizontalWrap(sprite){
+            const halfWidth = sprite.displayWidth * 0.5
+            const gameWidth = this.scale.width
+            if (sprite.x < -halfWidth)
+            {
+                sprite.x = gameWidth + halfWidth
+            }
+            else if (sprite.x > gameWidth + halfWidth)
+            {
+                sprite.x = -halfWidth
+            }
+        }
 }
 
 // Configuracion general
@@ -294,7 +311,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
+            debug: false,
             gravity: { y: 550 }
         }
     }

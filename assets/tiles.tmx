@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="4" height="5" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="1">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="4" height="5" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="1">
  <editorsettings>
   <export target="ground.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" name="tiles1" tilewidth="128" tileheight="128" tilecount="18" columns="18">
   <image source="spritesheet.png" width="2304" height="128"/>
  </tileset>
- <layer id="1" name="ground" width="4" height="5">
+ <layer id="1" name="ground" width="4" height="5" locked="1">
   <data encoding="csv">
 0,0,0,0,
 0,0,0,0,
-13,16,0,0,
+0,0,0,0,
 0,0,0,0,
 2,2,2,2
+</data>
+ </layer>
+ <layer id="4" name="title" width="4" height="5">
+  <data encoding="csv">
+0,0,0,0,
+1,2,2,4,
+1073741825,3221225474,3221225474,3221225473,
+0,0,0,0,
+0,0,0,0
 </data>
  </layer>
 </map>

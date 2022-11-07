@@ -11,12 +11,11 @@ let penguin;
 
 class MainScene extends Phaser.Scene {
     constructor(){
-        super('gameScene');
+        super('mainScene');
     }  
 
     preload(){
         this.load.image('background', './assets/BG/BG.png');
-        this.load.image('marco', './assets/BG/marco.png');
         this.load.image('ground', './assets/Tiles/ground.png');
         this.load.image('air_ground', './assets/Tiles/air_ground.png');
         this.load.image('player', './assets/sprites/penguin_walk01.png');
@@ -212,6 +211,13 @@ class Menu extends Phaser.Scene {
 
         /* objects */
         this.load.image('iglu', './assets/Object/Igloo.png');
+        this.load.image('tree1', './assets/Object/Tree_1.png');
+        this.load.image('tree2', './assets/Object/Tree_2.png');
+        this.load.image('icebox', './assets/Object/IceBox.png');
+        this.load.image('crystal', './assets/Object/Crystal.png');
+        this.load.image('stone', './assets/Object/Stone.png'); 
+        this.load.image('sign1', './assets/Object/Sign_1.png'); 
+        this.load.image('snowman', './assets/Object/SnowMan.png'); 
         /* -- */
 
         this.load.image('tiles', './assets/spritesheet.png');
@@ -232,16 +238,32 @@ class Menu extends Phaser.Scene {
     create(){
         /* background */
             this.add.image(256, 320, 'background').setScrollFactor(1, 0).alpha = 0.7;
+            this.add.image(256, 320, 'background').setScrollFactor(1, 0).alpha = 0.7;
             
             const map = this.make.tilemap({ key: "map", tileWidth: 128, tileHeight: 128});
             const tileset = map.addTilesetImage("tiles1","tiles");
             const layer = map.createLayer("ground", tileset, 0, 0);
+            const layer2 = map.createLayer("title", tileset, 0, 0);
+            layer2.setScale(.8, 1);
+            layer2.y = -60;
+            layer2.x = 50;
             layer.alpha = 0.6;
             
         /* --- */
 
         /* Objects */
-            this.add.image(20, 452, 'iglu').setScale(.6).flipX = true;
+            this.add.image(20, 400, 'tree1').setScale(.6);
+            this.add.image(20, 462, 'iglu').setScale(.5).flipX = true;
+            this.add.image(450, 429, 'tree2').setScale(.6);
+
+            this.add.image(105, 38, 'stone').setScale(.8);
+            this.add.image(105, 38, 'stone').setScale(.8);
+            this.add.image(380, 38, 'stone').setScale(.8);
+            this.add.image(140, 45, 'crystal').setScale(.6);
+            this.add.image(340, 45, 'sign1').setScale(.5);
+            this.add.image(340, 45, 'sign1').setScale(.5);
+            
+            this.add.image(200, 38, 'snowman').setScale(.3);
         /* --- */
 
         /* Penguni */
@@ -251,15 +273,14 @@ class Menu extends Phaser.Scene {
                 frameRate: 8,
                 repeat: -1
             }); 
-            penguin = this.physics.add.sprite(46, 480, 'player').setScale(.7);
-            if (penguin.x < 450){
-                penguin.setVelocityX(90);
-                penguin.anims.play('walk', true);
-            }
+            penguin = this.physics.add.sprite(480, 480, 'player').setScale(.7);
+            penguin.flipX = true;
+            penguin.setVelocityX(-90);
+            penguin.anims.play('walk', true);
         /* --- */
 
         /* Title */
-            let title = this.add.text(4, this.scale.height * .1, "¡Salta! \n Web-On", { fontSize: 128, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
+            let title = this.add.text(this.scale.width * .14, this.scale.height * .145, "¡Salta! \n Web-On", { fontSize: 95, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
             let btn_play = this.add.image(this.scale.width/2, this.scale.height * .8, 'play_btn').setScale(.5).setScrollFactor(1, 0).setInteractive();
         /* --- */
         
@@ -271,6 +292,12 @@ class Menu extends Phaser.Scene {
             btn_play.on('pointerout',function(pointer){
                 btn_play.setScale(.5);
             });
+
+            btn_play.on('pointerup', function (pointer) {
+                let cont = 1;
+                setInterval(function(){ context.cameras.main.setAlpha(cont -= .1)}, 1000);
+                // this.scene.start('mainScene');
+            }, this);
         /* --- */
 
         /* colitions */
@@ -281,19 +308,27 @@ class Menu extends Phaser.Scene {
 
     update(){
         this.horizontalWrap(penguin);
-    }
-        horizontalWrap(sprite){
-            const halfWidth = sprite.displayWidth * 0.5
-            const gameWidth = this.scale.width
-            if (sprite.x < -halfWidth)
-            {
-                sprite.x = gameWidth + halfWidth
-            }
-            else if (sprite.x > gameWidth + halfWidth)
-            {
-                sprite.x = -halfWidth
+
+        if (penguin.x < 125){
+            penguin.alpha -= .1;
+            if (penguin.alpha === 0){
+                penguin.destroy();
             }
         }
+    }
+
+    horizontalWrap(sprite){
+        const halfWidth = sprite.displayWidth * 0.5
+        const gameWidth = this.scale.width
+        if (sprite.x < -halfWidth)
+        {
+            sprite.x = gameWidth + halfWidth
+        }
+        else if (sprite.x > gameWidth + halfWidth)
+        {
+            sprite.x = -halfWidth
+        }
+    }
 }
 
 // Configuracion general
@@ -303,7 +338,7 @@ const config = {
     parent: 'game-container',
     width: 512,
     height: 640,
-    backgroundColor: '#007EE9',
+    backgroundColor: '#0000',
     scene: [Menu, MainScene],
     scale: {
         mode: Phaser.Scale.FIT

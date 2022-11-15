@@ -8,6 +8,8 @@ let Score = 0;
 let scoreText;
 let begin_jump = false;
 let penguin;
+let mContext;
+let cameraOffset = 180;
 
 class MainScene extends Phaser.Scene {
     constructor(){
@@ -15,13 +17,13 @@ class MainScene extends Phaser.Scene {
     }  
 
     preload(){
+        this.cameras.main.setAlpha(0);
         this.load.image('background', './assets/BG/BG.png');
         this.load.image('ground', './assets/Tiles/ground.png');
         this.load.image('air_ground', './assets/Tiles/air_ground.png');
-        this.load.image('player', './assets/sprites/penguin_walk01.png');
+        this.load.image('player', './assets/sprites/penguin_walk01.png'); 
         this.load.spritesheet('jump', './assets/sprites/jump.png', {frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('walk', './assets/sprites/walk.png', {frameWidth: 59, frameHeight: 64});
-
         loadFont('Snowtop Caps', './assets/fonts/Snowtop-Caps.ttf');
         function loadFont(name, url) {
             var newFont = new FontFace(name, `url(${url})`);
@@ -83,9 +85,17 @@ class MainScene extends Phaser.Scene {
             // this.cameras.main.setBounds(0, 0, 0, 0);
             // camera = this.cameras.main.startFollow(player, true);
             camera = this.cameras.main;
+            let cont = 0;
+            let intervalo = setInterval(function(){
+                camera.setAlpha(cont += .1);
+                if (camera.alpha == 1){
+                    clearInterval(intervalo);
+                }
+            }, 30); 
             camera.startFollow(player, true);
             camera.setLerp(0, 0.1);
-            camera.setDeadzone(this.scale.width);
+            camera.setFollowOffset(0, cameraOffset);
+            // camera.setDeadzone(this.scale.width * .1);
         /* --- */ 
 
         /* Collide */
@@ -100,13 +110,10 @@ class MainScene extends Phaser.Scene {
         // then create 5 platforms from the group
         for (let i = 0; i < 3; ++i) { 
             const x = Phaser.Math.Between(64, 448)
-            
             const y = 200 * i;
-        
             /** @type {Phaser.Physics.Arcade.Sprite} */
             const platform = air_ground.create(x, y, 'air_ground')
             platform.scale = .5
-        
             /** @type {Phaser.Physics.Arcade.StaticBody} */
             const body = platform.body
             body.updateFromGameObject()
@@ -124,7 +131,14 @@ class MainScene extends Phaser.Scene {
             key: 'walk',
             frames: this.anims.generateFrameNumbers('walk', {start: 0, end: 3}),
             frameRate: 8,
-            repeat: 0
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'idle',
+            frames: this.anims.generateFrameNumbers('walk', {start: 0, end: 0}),
+            frameRate: 8,
+            repeat: -1
         });
         /* --- */
     }
@@ -148,7 +162,7 @@ class MainScene extends Phaser.Scene {
         let velocityY = 500;
         let velocityX = 250;
         
-        if (scanner.space.isDown){
+        if (scanner.space.isDown || goLeft || goRight){
             begin_jump = true;
         }
 
@@ -162,6 +176,7 @@ class MainScene extends Phaser.Scene {
                 if (!begin_jump){player.anims.play('walk', true);}
             }else {
                 player.setVelocityX(0);
+                if (!begin_jump){player.anims.play('idle', true);}
             }
 
         if (begin_jump){
@@ -171,9 +186,23 @@ class MainScene extends Phaser.Scene {
             }
         }
 
+        //Sumo score
         if (player.y < Score){
-            Score = Math.trunc(player.y) ;
+            Score = Math.trunc(player.y);
             scoreText.setText(Score * -1);
+        }
+
+        //Cambio el offset de la camara para que se vea el persobnaje en mdio
+        if (Score != 0 && cameraOffset > 0){
+            camera.setFollowOffset(0, cameraOffset--);
+        }
+
+        if (player.y > Score + 509){
+            this.physics.pause();
+            player.setTint(0xFF3A0F);
+            setTimeout(() => {  this.scene.restart(); }, 1000);
+            Score = 0;
+            cameraOffset = 180;
         }
 
         this.horizontalWrap(player);
@@ -200,6 +229,7 @@ class Menu extends Phaser.Scene {
     }  
 
     preload(){
+        mContext = this;
         this.load.image('background', './assets/BG/BG.png');
         this.load.image('menu-digital', './assets/BG/menu-digital.png');
         this.load.image('ground', './assets/Tiles/ground.png');
@@ -276,11 +306,17 @@ class Menu extends Phaser.Scene {
             penguin = this.physics.add.sprite(480, 480, 'player').setScale(.7);
             penguin.flipX = true;
             penguin.setVelocityX(-90);
+            penguin.setSize(120, 50, true);
             penguin.anims.play('walk', true);
         /* --- */
 
+        /* Cameras */
+            camera = this.cameras.main;
+            camera.roundPixels = true;
+        /* --- */
+
         /* Title */
-            let title = this.add.text(this.scale.width * .14, this.scale.height * .145, "¡Salta! \n Web-On", { fontSize: 95, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
+            let title = this.add.text(this.scale.width * .18, this.scale.height * .165, "¡Salta! \n Web-On", { fontSize: 85, fill: "#ffffff", fontFamily: 'Snowtop Caps, "Goudy Bookletter 1911", Times, serif', align: "center"}).setScrollFactor(1, 0);
             let btn_play = this.add.image(this.scale.width/2, this.scale.height * .8, 'play_btn').setScale(.5).setScrollFactor(1, 0).setInteractive();
         /* --- */
         
@@ -295,8 +331,13 @@ class Menu extends Phaser.Scene {
 
             btn_play.on('pointerup', function (pointer) {
                 let cont = 1;
-                setInterval(function(){ context.cameras.main.setAlpha(cont -= .1)}, 1000);
-                // this.scene.start('mainScene');
+                let intervalo = setInterval(function(){
+                    camera.setAlpha(cont -= .1);
+                    if (camera.alpha == 0){
+                        clearInterval(intervalo);
+                        mContext.scene.start('mainScene');
+                    }
+                }, 30); 
             }, this);
         /* --- */
 

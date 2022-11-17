@@ -221,7 +221,7 @@ class MainScene extends Phaser.Scene {
 			sprite.x = -halfWidth
 		}
 	}
-}
+} 
 
 class Menu extends Phaser.Scene {
     constructor(){
